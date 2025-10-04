@@ -124,3 +124,10 @@ tester_request_duration_seconds_count{path="http://localhost:8000/health",status
 go build -o client && ./client -maxClients=3 -scaleInterval=2000
 
 ./client -stats
+
+# Настройка целевого сервера
+./client -stats -baseURL=http://production-server:8000
+
+# Prometheus метрики
+curl http://localhost:8081/metrics | grep myapp    # server-side
+curl http://localhost:8082/metrics | grep tester   # client-side
