@@ -122,3 +122,5 @@ tester_request_duration_seconds_sum{path="http://localhost:8000/health",status="
 tester_request_duration_seconds_count{path="http://localhost:8000/health",status="200"} 29
 
 go build -o client && ./client -maxClients=3 -scaleInterval=2000
+
+./client -stats

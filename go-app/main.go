@@ -121,6 +121,7 @@ func main() {
 	// Define handler functions for each endpoint.
 	r.GET("/api/devices", h.getDevices)
 	r.GET("/api/images", h.getImage)
+	r.GET("/api/stats", h.getStats)
 	r.GET("/health", h.getHealth)
 
 	// Start the main Gin HTTP server.
@@ -192,6 +193,69 @@ func (h *handler) getHealth(c *gin.Context) {
 	}()
 
 	c.JSON(200, gin.H{"status": "up"})
+}
+
+// getStats provides application statistics and metrics summary
+func (h *handler) getStats(c *gin.Context) {
+	// Record metrics for stats check
+	start := time.Now()
+	defer func() {
+		h.metrics.duration.With(prometheus.Labels{"op": "stats"}).Observe(time.Since(start).Seconds())
+	}()
+
+	// Get image count from database
+	var imageCount int64
+	err := h.dbpool.QueryRow(context.Background(), "SELECT COUNT(*) FROM go_image").Scan(&imageCount)
+	if err != nil {
+		log.Printf("failed to get image count: %v", err)
+		imageCount = -1
+	}
+
+	// Get latest images
+	var latestImages []map[string]interface{}
+	rows, err := h.dbpool.Query(context.Background(),
+		"SELECT image_uuid, file_name, file_size, content_type, status, processed_at FROM go_image ORDER BY processed_at DESC LIMIT 5")
+	if err != nil {
+		log.Printf("failed to get latest images: %v", err)
+	} else {
+		defer rows.Close()
+		for rows.Next() {
+			var uuid, fileName, contentType, status string
+			var fileSize int64
+			var processedAt time.Time
+
+			if err := rows.Scan(&uuid, &fileName, &fileSize, &contentType, &status, &processedAt); err == nil {
+				latestImages = append(latestImages, map[string]interface{}{
+					"uuid":        uuid,
+					"fileName":    fileName,
+					"fileSize":    fileSize,
+					"contentType": contentType,
+					"status":      status,
+					"processedAt": processedAt,
+				})
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"timestamp": time.Now(),
+		"database": gin.H{
+			"totalImages":  imageCount,
+			"latestImages": latestImages,
+		},
+		"system": gin.H{
+			"uptime":  time.Since(start), // Простой uptime с момента запроса
+			"version": "1.0.0",
+			"service": "go-monitoring",
+		},
+		"endpoints": gin.H{
+			"health":  "/health",
+			"devices": "/api/devices",
+			"images":  "/api/images",
+			"stats":   "/api/stats",
+			"metrics": ":8081/metrics",
+		},
+	})
 }
 
 // s3Connect initializes the S3 session.

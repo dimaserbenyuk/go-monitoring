@@ -17,18 +17,31 @@ var (
 	scaleInterval = flag.Int("scaleInterval", 500, "Scale interval in milliseconds")
 	randomSleep   = flag.Int("randomSleep", 1000, "Random sleep from 0 to target microseconds")
 	baseURL       = flag.String("baseURL", "http://localhost:8000", "Base URL for the target server")
+	statsOnly     = flag.Bool("stats", false, "Show current statistics and exit")
 )
 
 func main() {
-	// Sleep for 5 seconds before running test
-	time.Sleep(5 * time.Second)
-
 	// Parse the command line into the defined flags
 	flag.Parse()
+
+	// If stats flag is provided, show current statistics and exit
+	if *statsOnly {
+		viewer := NewStatsViewer(*baseURL)
+		if err := viewer.ShowCurrentStats(); err != nil {
+			log.Printf("Error showing stats: %v", err)
+		}
+		return
+	}
+
+	// Sleep for 5 seconds before running test
+	time.Sleep(5 * time.Second)
 
 	// Create Prometheus registry
 	reg := prometheus.NewRegistry()
 	m := NewMetrics(reg)
+
+	// Create statistics collector
+	statsCollector := NewStatsCollector()
 
 	// Create Prometheus HTTP server to expose metrics
 	pMux := http.NewServeMux()
@@ -38,6 +51,14 @@ func main() {
 	go func() {
 		log.Printf("Starting client metrics server on port 8082")
 		log.Fatal(http.ListenAndServe(":8082", pMux))
+	}()
+
+	// Start live statistics display
+	go func() {
+		for {
+			time.Sleep(2 * time.Second)
+			statsCollector.PrintTable()
+		}
 	}()
 
 	// Create transport and client to reuse connection pool
@@ -60,7 +81,7 @@ func main() {
 						wg.Done()
 						return
 					}
-					sendReq(m, client, url)
+					sendReq(m, statsCollector, client, url)
 				}
 			}()
 		}
