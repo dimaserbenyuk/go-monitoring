@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "go-app.fullname" . }}-config
+  labels:
+    {{- include "go-app.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    ---
+    appPort: {{ .Values.config.app.port }}
+    otlpEndpoint: {{ .Values.config.app.otlpEndpoint }}
+    s3:
+      region: {{ .Values.config.s3.region }}
+      bucket: {{ .Values.config.s3.bucket }}
+      endpoint: {{ .Values.config.s3.endpoint }}
+      pathStyle: {{ .Values.config.s3.pathStyle }}
+      user: {{ .Values.config.s3.user }}
+      secret: {{ .Values.config.s3.secret }}
+    db:
+      user: {{ .Values.config.database.user }}
+      password: {{ .Values.config.database.password }}
+      host: {{ .Values.config.database.host }}
+      database: {{ .Values.config.database.database }}

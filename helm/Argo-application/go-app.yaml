@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: go-app
+  namespace: argo-cd
+  # finalizers:
+  #   - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/dimaserbenyuk/go-monitoring.git
+    targetRevision: main
+    path: helm/go-app
+
+    helm:
+      # Extra parameters to set (same as setting through values.yaml, but these take precedence)
+      # parameters:
+      # - name: "service.port"
+      #   value: "8082"
+      # - name: "replicaCount"
+      #   value: "4"
+      # Helm values files for overriding values in the helm chart
+      # The path is relative to the spec.source.path directory defined above
+      valueFiles:
+      - values.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: go-app
+
+  # Sync policy
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true

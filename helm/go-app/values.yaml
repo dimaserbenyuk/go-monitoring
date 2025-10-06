@@ -18,10 +18,15 @@ env:
   - name: APP_PORT
     value: "8000"
   - name: OTLP_ENDPOINT
-    value: "localhost:4318"
+    value: "jaeger-collector:4318"
 
 # Application configuration
 config:
+  # Application settings
+  app:
+    port: 8000
+    otlpEndpoint: "jaeger-collector:4318"
+  
   # MinIO/S3 configuration
   s3:
     region: "us-west-rack1"
