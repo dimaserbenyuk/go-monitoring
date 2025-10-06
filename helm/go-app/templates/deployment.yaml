@@ -56,7 +56,7 @@ spec:
             {{- end }}
           volumeMounts:
             - name: config
-              mountPath: /app/config.yaml
+              mountPath: /config.yaml
               subPath: config.yaml
               readOnly: true
             {{- with .Values.volumeMounts }}
