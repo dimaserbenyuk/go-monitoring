@@ -10,10 +10,10 @@ spec:
   source:
     repoURL: https://github.com/dimaserbenyuk/go-monitoring.git
     targetRevision: main
-    chart: helm/base
+    path: helm/base
     helm:
-      values: |
-        - values.yaml
+      valueFiles:
+      - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: istio-system

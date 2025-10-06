@@ -2,24 +2,18 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: istiod
-  namespace: argocd
+  namespace: argo-cd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    repoURL: https://istio-release.storage.googleapis.com/charts
-    targetRevision: 1.24.0
-    chart: istiod
+    repoURL: https://github.com/dimaserbenyuk/go-monitoring.git
+    targetRevision: main
+    path: helm/istiod
     helm:
-      values: |
-        global:
-          meshID: mesh1
-          multiCluster:
-            clusterName: cluster1
-          network: network1
-        pilot:
-          traceSampling: 1.0
+      valueFiles:
+      - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: istio-system
