@@ -40,6 +40,11 @@ spec:
           {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - "-maxClients={{ .Values.loadTest.maxClients }}"
+            - "-scaleInterval={{ .Values.loadTest.scaleInterval }}"
+            - "-randomSleep={{ .Values.loadTest.randomSleep }}"
+            - "-baseURL={{ .Values.loadTest.baseURL }}"
           ports:
             - name: metrics
               containerPort: {{ .Values.service.port }}
