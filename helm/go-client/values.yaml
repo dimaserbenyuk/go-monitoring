@@ -16,11 +16,11 @@ image:
 # Load testing configuration
 loadTest:
   # Maximum number of virtual clients
-  maxClients: 10
+  maxClients: 20
   # Scale interval in milliseconds
-  scaleInterval: 1000
+  scaleInterval: 2000
   # Random sleep in microseconds
-  randomSleep: 1000
+  randomSleep: 2000
   # Target base URL (will be set to go-monitoring-app service)
   baseURL: "http://go-app-go-monitoring-app:8000"
 
