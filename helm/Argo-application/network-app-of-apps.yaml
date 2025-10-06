@@ -2,9 +2,9 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: network-stack
-  namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
+  namespace: argo-cd
+  # finalizers:
+  #   - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
@@ -13,7 +13,7 @@ spec:
     path: helm/Argo-application/network
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: argo-cd
   syncPolicy:
     automated:
       prune: true
